@@ -1,79 +1,113 @@
-# 🏋️ Telegram Fitness Coach: Adaptive AI Agent
+# Telegram Fitness Agent: AI Personal Coach
 
-A production-ready Telegram fitness agent that acts as a real personal coach. Unlike static fitness bots, this agent uses **LangGraph** for state-aware onboarding and a **Multi-Engine Adaptive System** that negotiates plans, tracks consistency, and automatically adjusts difficulty based on user feedback and life events (missed days, sickness, etc.).
+A production-grade Telegram fitness agent built with Python, LangGraph, and Groq. This agent functions as a persistent fitness coach that tracks progress, negotiates daily plans, and adapts to user feedback through a multi-engine state machine.
 
----
-
-## 🏗️ Core Architecture
-
-This project is built using a modular engine-based architecture designed for long-term reliability and easy maintenance.
-
-### 1. The Onboarding State Machine (LangGraph)
-Uses a persistent state graph to navigate a nuanced conversation with new users. Instead of a boring form, the bot learns about goals, injuries, and experience naturally through chat, eventually "classifying" the user's fitness maturity level before starting their journey.
-
-### 2. The Negotiation Engine (Psychology-Based)
-When a user rejects a daily plan, the bot doesn't just give up. It enters a **3-round protocol**:
-*   **Round 1:** Explains the "Why" behind the original plan.
-*   **Round 2:** Offers exactly two constrained alternatives based on user objections.
-*   **Round 3:** Sets boundaries and reminds the user of their core goal (the "Pulling Rank" phase).
-
-### 3. The Recovery & Scaling Engine
-The most "human" part of the bot. It detects gaps in consistency and handles them gracefully:
-*   **Excuse Handling:** Differentiates between "just didn't feel like it" (streak reset) and "it was raining/I'm sick" (excused).
-*   **Auto-Scaledown:** If tasks are consistently missed, the bot automatically scales the original habits down to "Micro-Habits" (5-10 mins) to rebuild momentum.
-
-### 4. Lightweight Database (Google Sheets)
-Uses Google Sheets as a low-cost, real-time database. You can literally watch your project populate and edit user data in real-time in the sheet while the bot is running.
+Unlike standard fitness bots, this agent implements a **Psychology-Based Negotiation protocol** and a **Recovery & Scaling system** to ensure long-term habit adherence.
 
 ---
 
-## 🛠️ Tech Stack
+## 🏗️ System Architecture
 
-*   **Logic:** Python 3.11
-*   **LLM Interface:** Groq (using `llama-3.3-70b-versatile` for high-speed reasoning)
-*   **State Management:** LangGraph (onboarding & persistence)
-*   **Database:** Google Sheets API (`gspread`)
-*   **Bot Framework:** `python-telegram-bot`
-*   **Deployment:** Railway / Docker-ready
+The project follows a modular "Engine" architecture to maintain clean separation of concerns:
+
+- **LangGraph State Machine**: Manages the multi-turn onboarding process and persistent user state.
+- **Negotiation Engine**: A 3-round negotiation protocol for plan adjustments (Explain → Offer Alternatives → Pull Rank).
+- **Recovery & Scaling Engine**: Detects consistency gaps and automatically triggers "Micro-Habit" scaling to prevent burnout.
+- **Daily Coaching Engine**: Handles morning plan generation, interactive task tracking, and evening reflections.
+- **Google Sheets Database**: Serves as a real-time, low-latency persistent store for user profiles, history, and message logs.
 
 ---
 
-## 🚀 Quick Setup Guide
+## 🔥 Key Features
 
-### 1. Preparation
-1. Create a **Google Service Account** and download the JSON key.
-2. Enable both **Google Sheets** and **Google Drive** APIs in the Google Cloud Console.
-3. Share your target Google Sheet with the Service Account email (Editor access).
-4. Get your bot token from **@BotFather** on Telegram.
+- **Adaptive Onboarding**: Uses LLM-driven classification to determine "Fitness Maturity" (Beginner to Elite).
+- **Interactive Task Management**: Plans are delivered with inline buttons for real-time progress tracking.
+- **Evening Reflection**: Collects qualitative feedback (RPE/Difficulty) to adjust tomorrow's plan intensity.
+- **Smart Streak Handling**: Differentiates between excused misses (sickness/work) and habit breaks to manage motivation.
+- **Automatic Scaledown**: If a user misses multiple days, the bot scales tasks down to 5-10 minute "Micro-Habits" to rebuild momentum.
 
-### 2. Environment Variables
-Add these to your `.env` file or Railway dashboard:
-*   `TELEGRAM_BOT_TOKEN`: The full token from @BotFather.
-*   `GROQ_API_KEY`: Your key from console.groq.com.
-*   `GOOGLE_SHEET_URL`: The full URL to your Google Sheet.
-*   `GOOGLE_SERVICE_ACCOUNT_JSON`: The **entire** content of your JSON key file.
+---
 
-### 3. Deploy
-The project includes a `Procfile` and `requirements.txt` for one-click deployment to platforms like Railway or Koyeb.
+## 🛠️ Technical Stack
+
+- **Linguistic Engine**: [Groq](https://groq.com/) (Llama-3.3-70B-Versatile)
+- **Framework**: `python-telegram-bot` (v20+)
+- **State Orchestration**: `LangGraph` & `LangChain`
+- **Database**: Google Sheets API via `gspread`
+- **Environment**: Python 3.11+
+
+---
+
+## 🚀 Installation & Setup
+
+### 1. Prerequisites
+- Python 3.11 or higher.
+- A Telegram Bot token from [@BotFather](https://t.me/botfather).
+- A Groq API Key from [Groq Console](https://console.groq.com/).
+- A Google Cloud Project with a Service Account (JSON key).
+
+### 2. Google Sheets Configuration
+1. Create a new Google Sheet.
+2. Enable **Google Sheets API** and **Google Drive API** in your Google Cloud Console.
+3. Create a **Service Account**, download the JSON key file.
+4. Share the Google Sheet with the Service Account email address as "Editor".
+5. Copy the **Google Sheet URL**.
+
+### 3. Clone and Install
 ```bash
-# Bot automatically sets up tabs & headers on first run!
-python app.py
+git clone https://github.com/PythonicDG/telegram-fitness-agent.git
+cd telegram-fitness-agent
+pip install -r requirements.txt
+```
+
+### 4. Environment Variables
+Create a `.env` file in the root directory:
+```env
+TELEGRAM_BOT_TOKEN="your_telegram_bot_token"
+GROQ_API_KEY="your_groq_api_key"
+GOOGLE_SHEET_URL="https://docs.google.com/spreadsheets/d/your_sheet_id/"
+GOOGLE_SERVICE_ACCOUNT_JSON='{"type": "service_account", ...}'
+```
+> **Note**: For `GOOGLE_SERVICE_ACCOUNT_JSON`, paste the entire content of your JSON key file as a single-line string or ensure your environment loader handles multi-line strings.
+
+---
+
+## 🎮 Bot Commands
+
+| Command | Description |
+|:---|:---|
+| `/start` | Initializes onboarding or resumes active coaching session. |
+| `/plan` | Generates the daily mission with interactive task buttons. |
+| `/checkin` | Evening reflection to evaluate performance and adjust difficulty. |
+| `/status` | Displays the user dashboard: Goal, Level, Streak, and Habits. |
+| `/resume` | Manual trigger for the Recovery Engine after a period of inactivity. |
+| `/reset` | Completely wipes all user data for a fresh start. |
+
+---
+
+## 📂 Project Structure
+
+```text
+├── app.py                # Main entry point & Telegram bot handlers
+├── config.py             # Environment config & client initializations
+├── database.py           # Google Sheets abstraction layer (SheetDB)
+├── graph.py              # LangGraph onboarding state machine logic
+├── prompts.py            # System prompts & persona definitions
+├── engines/              # Modular business logic
+│   ├── daily.py          # Daily generation & task completion
+│   ├── negotiation.py    # Psychology-based plan negotiation
+│   └── recovery.py       # Missed days & scaling logic
+└── requirements.txt      # Project dependencies
 ```
 
 ---
 
-## 🎮 How to Interact
+## 🚢 Deployment
 
-| Command | Action |
-|---|---|
-| `/start` | Begins onboarding or welcomes you back. |
-| `/plan` | Generates today's missions with interactive task buttons. |
-| `/checkin` | Evening reflection (updates difficulty for tomorrow). |
-| `/status` | View your 🔥 Streak, goal progress, and habits. |
-| `/resume` | Use this if you've been inactive for a while to wake the bot. |
-| `/reset` | Completely wipes your data for a fresh start. |
+The repository is deployment-ready for platforms like **Railway**, **Koyeb**, or **Heroku**.
 
 ---
 
-## 📝 A Note on AI Behavior
-The prompts are specifically tuned for a **Supportive but Direct** persona. The bot is designed to be warm and human, avoiding typical "As an AI..." phrasing. It remembers your injuries, your current schedule, and exactly how hard yesterday felt.
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
