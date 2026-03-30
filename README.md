@@ -2,7 +2,7 @@
 
 > A stateful, psychology-aware fitness agent that lives in your Telegram. Not a chatbot that answers fitness questions — an actual coach that remembers you, pushes back on excuses, and adapts when life gets in the way.
 
-**[Try it live → @YourBotHandle](https://t.me/yourbothandle)**
+**[Try it live → @YourBotHandle](https://t.me/fitness_power_ai_agent_bot)**
 
 ---
 
