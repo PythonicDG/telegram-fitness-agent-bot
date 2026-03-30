@@ -1,7 +1,29 @@
+# Environment
 .env
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
-service_account.json
-fitnessagentimplementation.py
+*.egg-info/
+dist/
+build/
+
+# ChromaDB local storage
 chroma_db/
+
+# Secrets
+service_account.json
+
+# Legacy
+fitnessagentimplementation.py
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
