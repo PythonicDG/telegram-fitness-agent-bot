@@ -142,6 +142,10 @@ class DailyCoachingEngine:
         tasks = today_plan.get("tasks", [])
         completed_today = [t["description"] for t in tasks if t.get("completed")]
         recent_messages = self.db.get_recent_messages(user_id, limit=5)
+
+        # Retrieve semantically relevant past context from ChromaDB
+        long_term_context = self.db.get_semantic_context(user_id, message, limit=5)
+
         prompt = FREEFORM_CHAT_PROMPT.format(
             profile=json.dumps(user.get("profile", {}), indent=2),
             maturity=user.get("fitness_maturity", "beginner"),
@@ -151,6 +155,11 @@ class DailyCoachingEngine:
             streak=user.get("streak", 0), days_active=user.get("days_active", 0),
             sub_state=user.get("daily_sub_state", ""),
         )
+
+        # Inject long-term memory into the prompt if available
+        if long_term_context:
+            prompt += f"\n\nRELEVANT PAST CONVERSATIONS (use these to maintain context):\n{long_term_context}"
+
         messages = recent_messages + [{"role": "user", "content": message}]
         response = self._call_llm(prompt, messages)
         self.db.save_message(user_id, "user", message, "daily_chat")

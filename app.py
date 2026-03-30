@@ -16,6 +16,7 @@ from telegram.ext import (
 from config import BOT_TOKEN, groq_client, spreadsheet
 from database import SheetDB
 from graph import build_coach_graph
+from memory import LongTermMemory
 from engines.daily import DailyCoachingEngine
 from engines.negotiation import NegotiationEngine
 from engines.recovery import RecoveryEngine
@@ -166,6 +167,8 @@ async def reset_command(update: Update, context):
                 break
     except Exception:
         pass
+    # Also clear ChromaDB memory for this user
+    LongTermMemory.clear(user_id)
     await update.message.reply_text("🔄 Data reset. Send /start to begin fresh!")
     print(f"   🔄 User {user_id} reset")
 
@@ -302,10 +305,15 @@ async def handle_message(update: Update, context):
     try:
         if current_state == "ONBOARDING":
             recent_messages = db.get_recent_messages(user_id, limit=10)
+
+            # Retrieve relevant past context from ChromaDB
+            long_term_context = db.get_semantic_context(user_id, message, limit=5)
+
             graph_state = {
                 "user_id": str(user_id), "state": "ONBOARDING", "daily_sub_state": "",
                 "profile": user.get("profile", {}), "fitness_maturity": "",
-                "current_habits": [], "messages": recent_messages + [{"role": "user", "content": message}],
+                "current_habits": [],
+                "messages": recent_messages + [{"role": "user", "content": message}],
                 "today_plan": {}, "negotiation_round": 0, "consecutive_misses": 0,
                 "streak": 0, "coach_response": "", "days_active": 0,
             }

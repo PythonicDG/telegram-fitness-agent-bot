@@ -3,6 +3,7 @@ import gspread
 from datetime import datetime
 from typing import Optional, List
 from gspread.exceptions import WorksheetNotFound
+from memory import LongTermMemory
 
 class SheetDB:
     """Simple database using Google Sheets with auto-setup."""
@@ -102,12 +103,18 @@ class SheetDB:
     def save_message(self, user_id: str, role: str, content: str, context_type: str = "general"):
         now = datetime.now().isoformat()
         self.messages.append_row([str(user_id), role, content, context_type, now])
+        # Dual-write: also store in ChromaDB for long-term semantic recall
+        LongTermMemory.store(str(user_id), role, content)
 
     def get_recent_messages(self, user_id: str, limit: int = 10) -> list:
         all_msgs = self.messages.get_all_records()
         user_msgs = [m for m in all_msgs if str(m["user_id"]) == str(user_id)]
         recent = user_msgs[-limit:]
         return [{"role": m["role"], "content": m["content"]} for m in recent]
+
+    def get_semantic_context(self, user_id: str, query: str, limit: int = 5) -> str:
+        """Retrieve semantically relevant past messages from ChromaDB."""
+        return LongTermMemory.recall(str(user_id), query, limit)
 
     # ---------- DAILY PLAN OPERATIONS ----------
 

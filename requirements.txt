@@ -4,3 +4,5 @@ gspread
 google-auth
 python-telegram-bot
 python-dotenv
+chromadb
+sentence-transformers
